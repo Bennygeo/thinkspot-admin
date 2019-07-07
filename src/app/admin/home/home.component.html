@@ -1,0 +1,37 @@
+<div class="container">
+    <div class="row" style="border-bottom: 1px solid #ccc;">
+        <div class="col-4" style="border-left: 1px solid #ccc;">Thinkspot</div>
+        <div class="col-8" style="padding-right: 0;">
+            <div style="position: relative; float: right;  border-right: 1px solid #ccc;" (click)="add_person()">
+                <i class="material-icons">person_add</i>
+            </div>
+            <div style="position: relative; float: right;  border-right: 1px solid #ccc;" (click)="view_customers()">
+                <i class="material-icons">people</i>
+            </div>
+            <div style="position: relative; float: right; border-right: 1px solid #ccc;  border-left: 1px solid #ccc;"
+                (click)="report()">
+                <i class="material-icons">
+                    show_chart
+                </i>
+            </div>
+        </div>
+    </div>
+    <div class="row serachCont">
+        <div class="col-9">
+            <form class="input-form">
+                <mat-form-field class="input-full-width" style="margin-top:6px;">
+                    <input matInput placeholder="Search" value="">
+                </mat-form-field>
+
+            </form>
+
+        </div>
+        <div class="col-3 right" style="margin-top:18px;">
+            <button mat-flat-button color="primary" style="position: relative; float: right;"><i class="material-icons"
+                    style="margin:0; font-size:22px;">search</i></button>
+        </div>
+    </div>
+</div>
+
+<footer class="fixed-bottom" style="background: #008000; color:#fff; text-align: center; padding: 12px; z-index: 100;"
+    (click)="assign()">Assign</footer>
