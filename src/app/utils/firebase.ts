@@ -17,16 +17,11 @@ export class FireBase implements OnInit {
 
     public readUsers() {
         return new Observable((observer) => {
-            var ref = this.db.database.ref('/users');
+            var ref = this.db.database.ref('/users_info');
             ref.on("value", function (snapshot) {
                 observer.next(snapshot.exportVal());
             });
         });
-
-        // let _data = this.db.database.ref('users').on("value", (data) => {
-        //     debugger;
-        // });
-
     }
 
     public writeUserMobileNumber(obj) {

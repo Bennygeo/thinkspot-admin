@@ -1,0 +1,4 @@
+<div class="box" *ngFor="let item of userList; let i = index;" (click)="onCustomerClick(i,item.mobile)">
+    <div>{{item.mobile}}</div>
+    <div>{{item.name}}</div>
+</div>

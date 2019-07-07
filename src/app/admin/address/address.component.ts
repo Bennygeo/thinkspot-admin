@@ -124,7 +124,7 @@ export class AddressComponent implements OnInit {
 
   closeDialog() {
     this.dialogRef.close();
-    this._router.navigate([{ outlets: { dialogeOutlet: null } }]);
+    this._router.navigate([{ outlets: { homeOutlet: null } }]);
   }
 }
 

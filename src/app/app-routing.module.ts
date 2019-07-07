@@ -3,6 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { AddressComponent } from './admin/address/address.component';
 import { NoAccessComponent } from './others/no-access/no-access.component';
 import { PageNotFoundComponent } from './others/page-not-found/page-not-found.component';
+import { CustomerListComponent } from './admin/customer-list/customer-list.component';
 
 const routes: Routes = [
   {
@@ -13,8 +14,15 @@ const routes: Routes = [
   {
     path: 'address',
     component: AddressComponent,
-    outlet: 'dialogeOutlet'
+    outlet: 'homeOutlet'
   },
+  {
+    // customer-list
+    path: 'customer-list',
+    component: CustomerListComponent,
+    outlet: 'homeOutlet'
+  },
+
   { path: 'no-access', component: NoAccessComponent },
   { path: '**', component: PageNotFoundComponent }
 ];

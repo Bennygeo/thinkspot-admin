@@ -19,6 +19,7 @@ import { NoAccessComponent } from './others/no-access/no-access.component';
 import { PageNotFoundComponent } from './others/page-not-found/page-not-found.component';
 import { HomeComponent } from './admin/home/home.component';
 import { MatDialogComponent } from './admin/mat-dialog/mat-dialog.component';
+import { CustomerListComponent } from './admin/customer-list/customer-list.component';
 
 @NgModule({
   declarations: [
@@ -28,6 +29,7 @@ import { MatDialogComponent } from './admin/mat-dialog/mat-dialog.component';
     PageNotFoundComponent,
     HomeComponent,
     MatDialogComponent,
+    CustomerListComponent,
   ],
   imports: [
     BrowserModule,

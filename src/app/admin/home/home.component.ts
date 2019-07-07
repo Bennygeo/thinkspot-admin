@@ -33,7 +33,7 @@ export class HomeComponent implements OnInit {
   add_person() {
     console.log("Add person.");
     // this._router.navigate(["/address"]);
-    this._router.navigate([{ outlets: { dialogeOutlet: ['address'] } }]);
+    this._router.navigate([{ outlets: { homeOutlet: ['address'] } }]);
     const dialogRef = this.dialog.open(MatDialogComponent, {
       width: '375px',
       // height:'500px',
