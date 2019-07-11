@@ -23,11 +23,13 @@ export class HomeComponent implements OnInit {
   }
 
   view_customers() {
+    this._router.navigate(['/book_order/']);
     console.log("View customers.");
   }
 
   report() {
     console.log("Report.");
+    this._router.navigate(["/customer_list/"]);
   }
 
   add_person() {

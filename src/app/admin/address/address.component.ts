@@ -123,6 +123,7 @@ export class AddressComponent implements OnInit {
   }
 
   closeDialog() {
+    console.log("Close dialog");
     this.dialogRef.close();
     this._router.navigate([{ outlets: { homeOutlet: null } }]);
   }

@@ -20,6 +20,9 @@ import { PageNotFoundComponent } from './others/page-not-found/page-not-found.co
 import { HomeComponent } from './admin/home/home.component';
 import { MatDialogComponent } from './admin/mat-dialog/mat-dialog.component';
 import { CustomerListComponent } from './admin/customer-list/customer-list.component';
+import { BookOrderComponent } from './admin/book-order/book-order.component';
+import { LocationStrategy, HashLocationStrategy, PathLocationStrategy } from '@angular/common';
+import { CustomerViewComponent } from './admin/customer-view/customer-view.component';
 
 @NgModule({
   declarations: [
@@ -30,6 +33,8 @@ import { CustomerListComponent } from './admin/customer-list/customer-list.compo
     HomeComponent,
     MatDialogComponent,
     CustomerListComponent,
+    BookOrderComponent,
+    CustomerViewComponent,
   ],
   imports: [
     BrowserModule,
@@ -45,7 +50,9 @@ import { CustomerListComponent } from './admin/customer-list/customer-list.compo
   entryComponents: [
     MatDialogComponent,
   ],
-  providers: [],
+  providers: [
+    { provide: LocationStrategy, useClass: HashLocationStrategy }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

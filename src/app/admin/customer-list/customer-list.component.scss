@@ -1,6 +1,32 @@
-.box{
-    height: 100px;
-    background-color: #efe;
-    margin-bottom:2px;
+.box {
+  height: auto;
+  //   background-color: #f3f9fd;
+  border-bottom: 1px dashed #ccc;
+  margin-bottom: 2px;
+  margin-top: 2px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+.customer_name {
+  font-size: 15px;
+  color: #111;
+  font-style: normal;
+  font-weight: 300;
+}
+.customer_m_no {
+  font-size: 20px;
+  color: #444;
+  font-weight: 500;
+}
 
+.btns {
+  padding-top: 6px;
+  padding-bottom: 6px;
+  background-color: #eee;
+  border: 1px solid #ccc;
+  color: #333;
+  font-weight: 500;
+}
+
+.custom-dialog {
 }
