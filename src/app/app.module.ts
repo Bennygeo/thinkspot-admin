@@ -14,7 +14,7 @@ import { environment } from 'src/environments/environment';
 import { AngularFireModule } from 'angularfire2';
 import { AngularFireDatabaseModule, AngularFireDatabase } from 'angularfire2/database';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatFormFieldModule, MatOptionModule, MatSelectModule, MatButtonModule, MatInputModule, MatRadioModule, MatDialogModule, MatSnackBarModule } from '@angular/material';
+import { MatFormFieldModule, MatOptionModule, MatSelectModule, MatButtonModule, MatInputModule, MatRadioModule, MatDialogModule, MatSnackBarModule, MatCheckboxModule, MatIconModule } from '@angular/material';
 import { NoAccessComponent } from './others/no-access/no-access.component';
 import { PageNotFoundComponent } from './others/page-not-found/page-not-found.component';
 import { HomeComponent } from './admin/home/home.component';
@@ -23,6 +23,9 @@ import { CustomerListComponent } from './admin/customer-list/customer-list.compo
 import { BookOrderComponent } from './admin/book-order/book-order.component';
 import { LocationStrategy, HashLocationStrategy, PathLocationStrategy } from '@angular/common';
 import { CustomerViewComponent } from './admin/customer-view/customer-view.component';
+import { PlusMinusComponent } from './utils/plus-minus/plus-minus.component';
+import { Utils } from './utils/utils';
+import { DateUtils } from './utils/date-utils';
 
 @NgModule({
   declarations: [
@@ -35,12 +38,13 @@ import { CustomerViewComponent } from './admin/customer-view/customer-view.compo
     CustomerListComponent,
     BookOrderComponent,
     CustomerViewComponent,
+    PlusMinusComponent,
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     FormsModule,
-    MatFormFieldModule, MatOptionModule, MatSelectModule, MatButtonModule, MatInputModule, MatRadioModule, MatDialogModule, MatSnackBarModule,
+    MatFormFieldModule, MatOptionModule, MatSelectModule, MatButtonModule, MatInputModule, MatRadioModule, MatDialogModule, MatSnackBarModule, MatCheckboxModule, MatIconModule,
     BrowserAnimationsModule,
     AngularFireModule.initializeApp(environment.firbase, 'angular-auth-firebase'),
     AngularFireDatabaseModule,
@@ -51,6 +55,10 @@ import { CustomerViewComponent } from './admin/customer-view/customer-view.compo
     MatDialogComponent,
   ],
   providers: [
+    Utils,
+    DateUtils,
+    // AuthService,
+    AngularFireDatabase,
     { provide: LocationStrategy, useClass: HashLocationStrategy }
   ],
   bootstrap: [AppComponent]

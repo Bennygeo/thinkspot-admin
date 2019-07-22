@@ -16,8 +16,18 @@ export class FireBase implements OnInit {
     }
 
     public readUsers() {
+        console.log("read data");
         return new Observable((observer) => {
             var ref = this.db.database.ref('/users_info');
+            ref.on("value", function (snapshot) {
+                observer.next(snapshot.exportVal());
+            });
+        });
+    }
+
+    public readOrders(id) {
+        return new Observable((observer) => {
+            var ref = this.db.database.ref("users_info/" + id + '/history/');
             ref.on("value", function (snapshot) {
                 observer.next(snapshot.exportVal());
             });
@@ -34,6 +44,7 @@ export class FireBase implements OnInit {
     }
 
     public writeUserAddress(obj, locId) {
+        console.log("write data");
         this.db.database.ref('/users/' + obj.id + '/address/').update({
             ['address' + locId]: JSON.stringify(obj.address)
         }, (error) => {
@@ -50,6 +61,31 @@ export class FireBase implements OnInit {
         }, (error) => {
             if (error) callback("Write Failed.");
             else callback("Success");
+        });
+    }
+
+    public write_tc_orders(date, id, obj) {
+        this.db.database.ref("/orders/" + date + "/" + id + "/").update({
+            tender: JSON.stringify(obj)
+        }, (error) => {
+            if (error) console.log("The write failed...");
+            else console.log("Data saved successfully!");
+        });
+    }
+
+    public user_history(id, obj, active) {
+        this.db.database.ref("/users_info/" + id).push({
+            history: JSON.stringify(obj)
+        }, (error) => {
+            if (error) console.log("The write failed...");
+            else console.log("Data saved successfully!");
+        });
+
+        this.db.database.ref("/users_info/" + id + "/").update({
+            active: active
+        }, (error) => {
+            if (error) console.log("The write failed...");
+            else console.log("Data saved successfully!");
         });
     }
 

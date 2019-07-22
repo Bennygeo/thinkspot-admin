@@ -1,5 +1,52 @@
+import { Injectable } from '@angular/core';
+
+@Injectable()
 export class Utils {
+    monthNames: Array<string>;
+    weekdays: Array<string>;
+    monthName: Object;
+    weeks: Object;
+    orderService: number;
+    todayNo: number;
+    todayDate: Date;
+    todayString: string;
+
+    constructor() {
+        // this.orderService = (this._localStorage.getItem("itemPrice")) ? (this._localStorage.getItem("itemPrice")) : 1;
+        this.todayDate = new Date();
+        this.todayNo = this.todayDate.getDay();
+
+
+        this.monthNames = ["January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+        this.weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+        this.todayString = this.weekdays[this.todayNo];
+    }
+
+    static trace = console.log;
+
+    public formatAMPM(date) {
+        var hours = date.getHours();
+        var minutes = date.getMinutes();
+        var ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // the hour '0' should be '12'
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        var strTime = hours + ':' + minutes + ' ' + ampm;
+        return strTime;
+    }
+
+    generateRandomNumber(): string {
+        return Math.floor(1000 + Math.random() * 9000).toString();
+    }
+    static getDate(divider): string {
+        var today = new Date();
+        return today.getDate() + divider + (today.getMonth() + 1) + divider + today.getFullYear();
+    }
 }
+
 
 export class UserDetails {
     name: string;

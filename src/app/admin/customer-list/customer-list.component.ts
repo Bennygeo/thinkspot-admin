@@ -29,6 +29,7 @@ export class CustomerListComponent implements OnInit {
     this._service.onUserListUpdate.subscribe((data) => {
       console.log("REcieve data");
       console.log(data);
+      this.userList = [];
       for (let key in data) {
         data[key].mobile = key;
         this.userList.push(data[key]);
@@ -57,7 +58,7 @@ export class CustomerListComponent implements OnInit {
     // customer_view
     // this._router.navigate([{ outlets: { dialogeOutlet: null } }]);
     // console.log("index :: " + index);
-    this._router.navigate(['/customer_view/' + index]);
+    this._router.navigate(['/customer_view/' + Date.now()]);
   }
 
   postponedAnOrder(index, mobile) {

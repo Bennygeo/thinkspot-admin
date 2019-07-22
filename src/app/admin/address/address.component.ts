@@ -115,7 +115,8 @@ export class AddressComponent implements OnInit {
         street: vals.street,
         type: typeLabel
       },
-      "area": areaLabel
+      "area": areaLabel,
+      "active": "no "
     }, (result) => {
       this._commons.openSnackBar(result, "");
     });

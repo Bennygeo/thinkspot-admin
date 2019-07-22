@@ -24,7 +24,8 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
     // this._router.navigate(["customer_list"]);
     // this._router.navigate([{ outlets: { homeOutlet: ['customer-list'] } }]);
-    this._service.readCustomerList();
+    this._service.readCustomerList(true);
+    this._service.readOrdersList();
   }
 
 }
