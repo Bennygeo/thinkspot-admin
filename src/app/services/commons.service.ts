@@ -12,6 +12,7 @@ export class CommonsService {
   orders: Object = {};
   onUserListUpdate: EventEmitter<any> = new EventEmitter();
   userOrdersUpdate: EventEmitter<any> = new EventEmitter();
+  historyLength: number =0;
 
   private _fb: FireBase;
 

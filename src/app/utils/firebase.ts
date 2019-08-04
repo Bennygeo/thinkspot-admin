@@ -35,7 +35,7 @@ export class FireBase implements OnInit {
     }
 
     public writeUserMobileNumber(obj) {
-        this.db.database.ref('/users/' + obj.id).update({
+        this.db.database.ref('/users/' + obj.id).push({
             mobile: obj.mobile
         }, (error) => {
             if (error) console.log("The write failed...");
@@ -73,9 +73,9 @@ export class FireBase implements OnInit {
         });
     }
 
-    public user_history(id, obj, active) {
-        this.db.database.ref("/users_info/" + id).push({
-            history: JSON.stringify(obj)
+    public user_history(id, obj, active, cnt) {
+        this.db.database.ref("/users_info/" + id + '/history/').update({
+            [cnt]: obj
         }, (error) => {
             if (error) console.log("The write failed...");
             else console.log("Data saved successfully!");
@@ -85,6 +85,17 @@ export class FireBase implements OnInit {
             active: active
         }, (error) => {
             if (error) console.log("The write failed...");
+            else console.log("Data saved successfully!");
+        });
+    }
+
+    public editupdateWrite(id, cnt, obj, date) {
+        // debugger;
+        this.db.database.ref("/users_info/" + id + "/history/" + cnt + "/dates/" + date).update({
+            'replacement': obj.replacement,
+            'count': obj.count
+        }, (error) => {
+            if (error) console.log("The write failed :: editupdateWrite");
             else console.log("Data saved successfully!");
         });
     }

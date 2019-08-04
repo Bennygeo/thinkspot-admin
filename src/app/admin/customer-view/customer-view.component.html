@@ -4,22 +4,52 @@
   </div>
 
   <div class="row">
-    <div class="col-3" *ngFor="let item of orders; let i = index;">
+    <div class="col-3" *ngFor="let item of orders; let i = index;" (click)="onUserDatesClick($event, item)"
+      (clickOutside)=" closeOutsideSidenav()">
       <div class="row" style="margin-bottom: 6px; margin-left:-9px; margin-right:-9px;">
-        <div style="border:1px solid #ccc; margin-bottom: 6px; width: 100%;">
-          <div class="col-12 center" style="font-size: 10px; background: #eee; margin-bottom: 6px;">
-            {{(i+1)}}
+        <div style="border:1px solid #ccc; margin-bottom: 6px; width: 100%;"
+          [ngClass]="{'activeDate': selectedDateItem == item}">
+          <div class="col-12 center" style="font-size: 12px; background: #eee; margin-bottom: 6px; color: #aaa">
+            Day {{item.index}}
           </div>
-          <div class="col-12 center">2</div>
-          <div style="border-top:1px dashed #ccc; background-color: #f3fbff; padding: 12px;" class="col-12 center">21
-            july
+          <div class="col-12 center">{{item.count}}</div>
+          <div style="border-top:1px dashed #ccc; padding: 6px; text-align: center; font-size: 12px; "
+            class="col-12 center assigned"
+            [ngClass]="{'delivered': false, 'notDelivered': false, 'missed': false, 'assigned': true}">
+            {{item.date}}
           </div>
+          <!-- <div>{{item.expired}}</div> -->
         </div>
       </div>
     </div>
   </div>
 
-  <div class="row">
+  <!-- Edit options -->
+  <div class="row" *ngIf="editEnabled">
+    <div class="col-md-2">
+      <h6 style="background-color: #eee; padding: 6px; font-size: 14px;">Edit on {{selectedDateItem.date}}</h6>
+      <plus-minus class="tenderComp" [caption]="'Select units'" [inputVal]="minCount" [stepVal]="1"
+        (updateValue)="orderCountUpdate($event)"></plus-minus>
+
+      <!-- <p style="margin-top: 18px; padding: 0; font-size: 12px;">Number of replacements</p> -->
+      <mat-form-field style="width: 100%; margin-top: 12px;">
+        <input matInput [(ngModel)]="noOfReplacements" placeholder="Number of replacements."
+          (keypress)="numberOnly($event)">
+      </mat-form-field>
+
+      <button (click)="editUpdateAction()" class="btn btn-success" style="margin:6px; margin-left: 0;">Update</button>
+      <button (click)="editCancelAction()" class="btn btn-danger">Cancel</button>
+    </div>
+  </div>
+
+  <div class="row btn-group-vertical center" style="margin-left:-9px;margin-right:-9px;" *ngIf="btnsView">
+    <button class="btn btn-primary" (click)="editAction()">Edit</button>
+    <button class="btn btn-info" (click)="postponeAction()">Postpone </button>
+    <button class="btn btn-danger" (click)="pauseAction()">Pause</button>
+    <button class="btn btn-danger" (click)="stopAction()">Stop</button>
+  </div>
+
+  <div class="row" *ngIf="!ordersExist">
     <div class="col-md-2" align="center">
       <plus-minus class="tenderComp" [caption]="'Select units'" [inputVal]="minCount" [stepVal]="1"
         (updateValue)="plusMinusValue($event)"></plus-minus>

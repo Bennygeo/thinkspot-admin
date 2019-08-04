@@ -14,4 +14,25 @@ export class DateUtils extends Date {
 
         return day + divider + (mnth) + divider + date.getFullYear();
     }
+
+    dateFormater(dateString, divider) {
+        let str = dateString.split('-');
+        // console.log("str :: " + str.length);
+        if (str.length > 1)
+            return str.join('');
+        else
+            return dateString.slice(0, 2) + divider + dateString.slice(2, 4) + divider + dateString.slice(4);
+    }
+
+    stdDateFormater(date: string) {
+        let data = date.split('-');
+        return data[1] + '/' + data[0] + '/' + data[2];
+    }
+
+    dateDiff(date1, date2): number {
+        let timeDiff = date1.getTime() - date2.getTime();
+        return timeDiff / (1000 * 3600 * 24);
+    }
+
+    
 }

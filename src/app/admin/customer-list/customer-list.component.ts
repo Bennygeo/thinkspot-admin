@@ -2,7 +2,6 @@ import { Component, OnInit, ChangeDetectorRef, HostListener, NgZone } from '@ang
 import { CommonsService } from 'src/app/services/commons.service';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material';
-import { MatDialogComponent } from '../mat-dialog/mat-dialog.component';
 
 @Component({
   selector: 'customer-list',
@@ -12,19 +11,19 @@ import { MatDialogComponent } from '../mat-dialog/mat-dialog.component';
 export class CustomerListComponent implements OnInit {
 
   userList: Array<any> = [];
+  searchText: string = "";
 
   constructor(
     private _service: CommonsService,
-    private _changeDet: ChangeDetectorRef,
     private _router: Router,
     public dialog1: MatDialog,
     private ngZone: NgZone
   ) {
-    console.log("customer list class");
+    // console.log("customer list class");
   }
 
   ngOnInit() {
-    console.log("customer list class :: oninit");
+    // console.log("customer list class :: oninit");
     // debugger;
     this._service.onUserListUpdate.subscribe((data) => {
       console.log("REcieve data");
@@ -34,10 +33,9 @@ export class CustomerListComponent implements OnInit {
         data[key].mobile = key;
         this.userList.push(data[key]);
       }
-      this.ngZone.run(() => this._router.navigate(['customer_list']));
-      // this._changeDet.detectChanges();
+      // this.ngZone.run(() => this._router.navigate(['customer_list']));
+      this.ngZone.run(() => console.log("ng on init."));
     });
-    // this._changeDet.detectChanges();
   }
 
   onCustomerClick(evt, index, mobile) {
@@ -55,13 +53,21 @@ export class CustomerListComponent implements OnInit {
   }
 
   bookAnOrder(index, mobile) {
+    console.log("bookAnOrder");
     // customer_view
     // this._router.navigate([{ outlets: { dialogeOutlet: null } }]);
     // console.log("index :: " + index);
-    this._router.navigate(['/customer_view/' + Date.now()]);
+    this._router.navigate(['/customer_view/' + Date.now(), { mobile: mobile, index: index }]);
   }
 
   postponedAnOrder(index, mobile) {
 
+  }
+
+  inputTxtChanged(evt) {
+    // console.log(evt);
+    this.searchText = evt;
+    // let data = this._service.userList;
+    // https://stackblitz.com/edit/angular-search-filter
   }
 }

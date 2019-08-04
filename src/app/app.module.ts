@@ -27,6 +27,8 @@ import { PlusMinusComponent } from './utils/plus-minus/plus-minus.component';
 import { Utils } from './utils/utils';
 import { DateUtils } from './utils/date-utils';
 
+import { Ng2SearchPipeModule } from 'ng2-search-filter';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -50,6 +52,7 @@ import { DateUtils } from './utils/date-utils';
     AngularFireDatabaseModule,
     AngularFireAuthModule,
     ReactiveFormsModule,
+    Ng2SearchPipeModule
   ],
   entryComponents: [
     MatDialogComponent,

@@ -45,6 +45,7 @@ export class Utils {
         var today = new Date();
         return today.getDate() + divider + (today.getMonth() + 1) + divider + today.getFullYear();
     }
+
 }
 
 

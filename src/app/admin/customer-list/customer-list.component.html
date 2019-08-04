@@ -1,6 +1,21 @@
 <div class="container">
+    <div class="row serachCont">
+        <div class="col-9">
+            <form class="input-form">
+                <mat-form-field class="input-full-width" style="margin-top:6px;">
+                    <input matInput placeholder="Search" value="" (input)="inputTxtChanged($event.target.value)">
+                </mat-form-field>
+
+            </form>
+        </div>
+        <div class="col-3 right" style="margin-top:18px;">
+            <button mat-flat-button color="primary" style="position: relative; float: right;"><i class="material-icons"
+                    style="margin:0; font-size:22px;">search</i></button>
+        </div>
+    </div>
     <p>Customer's list</p>
-    <div class="row box" *ngFor="let item of userList; let i = index;" (click)="onCustomerClick($event, i,item.mobile)">
+    <div class="row box" *ngFor="let item of userList | filter:searchText; let i = index;"
+        (click)="onCustomerClick($event, i,item.mobile)">
         <div class="col-6">
             <div class="customer_name">{{item.name}}</div>
             <div class="customer_m_no"><span style="font-size: 12px; color:#aaa; font-weight: 300;">+91</span>

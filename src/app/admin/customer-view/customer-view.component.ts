@@ -1,5 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef, Input, Output, EventEmitter } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit, ChangeDetectorRef, Input, Output, EventEmitter, NgZone, ViewChild, HostListener } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
 import { CommonsService } from 'src/app/services/commons.service';
 import { FireBase } from 'src/app/utils/firebase';
 import { AngularFireDatabase } from 'angularfire2/database';
@@ -73,7 +73,8 @@ export class CustomerViewComponent implements OnInit {
   /*
   * total number of units per day
   */
-  unitsPerDay: number = this.nutTypes[0]["minCount"];;
+  unitsPerDay: number = this.nutTypes[0]["minCount"];
+  editedUnitsPerDay: number = this.nutTypes[0]["minCount"];
   /*
   * Subscribed days
   */
@@ -95,8 +96,17 @@ export class CustomerViewComponent implements OnInit {
   end_date: Date;
   firebase: FireBase;
 
+  //orders;
   orders: Array<any>;
   historyObj: Object = {};
+  msg: string;
+  btnsView: boolean = false;
+  ordersExist: boolean = true;
+
+  mobile: any;
+  selectedDateItem: any;
+  editEnabled: boolean = false;
+  noOfReplacements: number = 0;
 
   constructor(
     private _router: Router,
@@ -107,6 +117,8 @@ export class CustomerViewComponent implements OnInit {
     private _utils: Utils,
     private date_utils: DateUtils,
     private db: AngularFireDatabase,
+    private _activatedRoute: ActivatedRoute,
+    private _changeDet: ChangeDetectorRef,
   ) {
     this._fb = new FireBase(this._db);
     this.type = this.types[0];
@@ -132,10 +144,6 @@ export class CustomerViewComponent implements OnInit {
 
   ngOnInit() {
 
-    for (let i = 0; i < 7; i++) {
-      this.orders[i] = "order_" + (i + 1);
-    }
-
     this.packageOptions = {
       "pack7": this.price - this.discount + this.deliveryCharges + ((this.strawFlag) ? 2 : 0),
       "3andmore": this.price - this.discount + this.deliveryCharges + ((this.strawFlag) ? 2 : 0),
@@ -147,13 +155,53 @@ export class CustomerViewComponent implements OnInit {
     */
     this.priceOption = this.packageOptions["std"];
     this.renderChanges();
+
+    this._activatedRoute.paramMap.subscribe(params => {
+      this.mobile = params.get('mobile');
+      // console.log("mobile :: " + this.mobile);
+
+      this.firebase.readOrders(this.mobile).subscribe((data: any) => {
+
+        if (!data) {
+          this.msg = "No active ordres.";
+          this.ordersExist = false;
+          return;
+        };
+
+        this.ordersExist = true;
+        this._service.historyLength = Object.keys(data).length;
+        let _data = data[this._service.historyLength];
+
+        this.historyObj = _data;
+        let cnt = -1;
+        for (var key in _data["dates"]) {
+          cnt++;
+          var __date = this.date_utils.dateFormater(key, "-");
+          // console.log("key :: " + this.date_utils.stdDateFormater(__date));
+          // console.log("diff : " + );
+          this.orders[cnt] = {
+            index: _data["dates"][key].index,
+            date: this.date_utils.dateFormater(key, "-"),
+            count: _data["dates"][key].count,
+            expired: (Math.sign(this.date_utils.dateDiff(new Date(), new Date(this.date_utils.stdDateFormater(__date)))) == -1) ? false : true
+          };
+        }
+
+        // debugger;
+        this.orders.sort(function (a, b) {
+          return a.index - b.index
+        });
+
+        this._changeDet.detectChanges();
+      });
+
+    });
   }
 
   @Input() data: any = {
     p_name: "Tender"
   };
   @Output() stockValueChange = new EventEmitter();
-
 
   plusMinusValue(val) {
     // console.log("tender plus minus called : " + val);
@@ -260,18 +308,6 @@ export class CustomerViewComponent implements OnInit {
       "paid": "No",
       "nut_type": "sweet",
     }
-
-    this.historyObj = {
-      "start_date": this.date_utils.getDateString(this.start_date, "-"),
-      "end_date": this.date_utils.getDateString(this.end_date, "-"),
-      "totalPrice": this.totalPrice,
-      "per_day": this.unitsPerDay,
-      "straw": this.strawFlag,
-      "offers": this.diff,
-      "no_of_days": this.subscribedDays,
-      "active": "yes",
-      "price": this.originalPrice
-    }
   }
 
   private onNutVarietyChange(e) {
@@ -358,18 +394,132 @@ export class CustomerViewComponent implements OnInit {
   }
 
   addToSubscriptionBag() {
-    for (let i = 0; i < this.subscribedDays; i++) {
-      let _date = this.date_utils.addDays(new Date(), i);
-      this.firebase.write_tc_orders(this.date_utils.getDateString(_date, ""), "9486140936", this.tenderDetails);
-      // console.log(i + " : date : " + this.date_utils.getDateString(_date, ""));
+    let index = 0;
+
+    this.historyObj = {
+      // "start_date": this.date_utils.getDateString(this.start_date, "-"),
+      // "end_date": this.date_utils.getDateString(this.end_date, "-"),
+      "totalPrice": this.totalPrice,
+      "per_day": this.unitsPerDay,
+      "straw": this.strawFlag,
+      "offers": this.diff,
+      "no_of_days": this.subscribedDays,
+      "active": "yes",
+      "price": this.originalPrice,
+      "paused": false,
+      "dates": {
+
+      }
     }
 
-    this.firebase.user_history("9486140936", this.historyObj, "yes");
+    for (var key in this.selectedDays) {
+      index++;
+      if (this.selectedDays[key] == 1) {
+        // console.log("Key :: " + key);
+        let _date = this.date_utils.addDays(new Date(), key);
+        // console.log("date :: " + _date);
+        this.firebase.write_tc_orders(this.date_utils.getDateString(_date, ""), "9486140936", this.tenderDetails);
+
+        this.historyObj['dates'][this.date_utils.getDateString(_date, "")] = {
+          index: index,
+          'delivered': false,
+          'missed': false,
+          'replacement': 0,
+          'assigned_to': 'nil',
+          'delivered_by': 'nil',
+          'count': this.unitsPerDay
+        }
+      }
+    }
+    // let start = this.date_utils.stdDateFormater(this.historyObj['start_date']);
+    this.firebase.user_history("9486140936", this.historyObj, "yes", this._service.historyLength + 1);
+  }
+
+
+  @HostListener('document:click', ['$event.target'])
+  public onClick(targetElement) {
+
+  }
+  closeOutsideSidenav() {
+    console.log("closeOutsideSidenav");
+  }
+
+  onUserDatesClick(evt, data) {
+    // console.log(data);    
+    this.selectedDateItem = data;
+    let date = this.date_utils.dateFormater(data.date, "");
+    // console.log("date :: " + data.date);
+    // console.log("____________________________________");
+
+    this.editEnabled = false;
+
+    if (!this.historyObj['dates'][date]["delivered"]) {
+      this.btnsView = true;
+    } else {
+      this.btnsView = false;
+    }
+
+    this._changeDet.detectChanges();
+    return false;
   }
 
   clickToHome() {
     this._router.navigate(["customer_list"]);
     this._service.readCustomerList(false);
+  }
+
+  editAction() {
+    console.log("Edit");
+    this.editEnabled = true;
+    this.btnsView = false;
+  }
+
+  postponeAction() {
+    console.log("Postpone");
+  }
+
+  deleteAction() {
+    console.log("Delete");
+  }
+
+  pauseAction() {
+    console.log("Pause");
+  }
+
+  stopAction() {
+    console.log("Stop");
+  }
+
+  orderCountUpdate(val) {
+    this.editedUnitsPerDay = val;
+  }
+
+  editUpdateAction() {
+    // console.log("editUpdateAction");
+    // console.log(this.selectedDateItem);
+    let date = this.date_utils.dateFormater(this.selectedDateItem.date, "");
+    // this.historyObj['dates'][date]['replacement'] = this.noOfReplacements;
+    // this.historyObj['dates'][date]['count'] = this.editedUnitsPerDay;
+
+    // console.log(this.historyObj['dates'][date]);
+    this.firebase.editupdateWrite("9486140936", this._service.historyLength, { count: this.editedUnitsPerDay, replacement: this.noOfReplacements }, date);
+    // console.log("update : " + this.editedUnitsPerDay + "  -- :: " + this.noOfReplacements);
+    // debugger;
+  }
+
+  editCancelAction() {
+    console.log("editCancelAction");
+    this.editEnabled = false;
+    this.btnsView = true;
+
+  }
+
+  numberOnly(event): boolean {
+    const charCode = (event.which) ? event.which : event.keyCode;
+    if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+      return false;
+    }
+    return true;
   }
 }
 

@@ -123,3 +123,57 @@ $Montserrat: Montserrat, sans-serif;
   }
 }
 
+.btn {
+  margin-top: 6px;
+  margin-bottom: 6px;
+  font-family: $Montserrat;
+}
+
+.btns-icons {
+  display: block;
+  color: #000;
+  margin: 6px;
+  font-size: 29px;
+}
+
+.first {
+  background: #64bb02;
+}
+.second {
+  // font-size: 24px;
+  color: #f00;
+}
+.third {
+  background: red;
+}
+
+.delivered {
+  background-color: #64bb02;
+  color: #fff;
+}
+.onTheWay {
+  background-color: orange;
+  color: #fff;
+}
+
+.notDelivered {
+  background-color: rgb(182, 10, 10);
+  color: #fff;
+}
+
+.assigned {
+  background-color: #f3fbff;
+  color: #000;
+}
+
+.missed {
+  background-color: rgb(255, 4, 4);
+  color: #fff;
+}
+
+.activeDate {
+  border: 1px solid #1d8aff;
+  width: 100%;
+  background: #1d8aff;
+  color: #fff;
+}
