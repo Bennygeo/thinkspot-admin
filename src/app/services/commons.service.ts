@@ -10,9 +10,11 @@ export class CommonsService {
 
   userList: Object = {};
   orders: Object = {};
+  deliveryBoysList: Object = {};
+
   onUserListUpdate: EventEmitter<any> = new EventEmitter();
   userOrdersUpdate: EventEmitter<any> = new EventEmitter();
-  historyLength: number =0;
+  historyLength: number = 0;
 
   private _fb: FireBase;
 
@@ -56,5 +58,11 @@ export class CommonsService {
         this.userOrdersUpdate.emit(val);
       }, 0, val);
     });
+  }
+
+  public readDeliverBoys() {
+    // this._fb.readDeliverBoys().subscribe((data: any) => {
+    //   this.deliveryBoysList = data;
+    // });
   }
 }

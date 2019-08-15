@@ -25,6 +25,15 @@ export class FireBase implements OnInit {
         });
     }
 
+    readDeliverBoys() {
+        return new Observable((observer) => {
+            var ref = this.db.database.ref('/delivery_boys');
+            ref.on("value", function (snapshot) {
+                observer.next(snapshot.exportVal());
+            });
+        });
+    }
+
     public readOrders(id) {
         return new Observable((observer) => {
             var ref = this.db.database.ref("users_info/" + id + '/history/');
@@ -89,14 +98,18 @@ export class FireBase implements OnInit {
         });
     }
 
-    public editupdateWrite(id, cnt, obj, date) {
+    public editupdateWrite(id, cnt, obj, date, callback) {
         // debugger;
         this.db.database.ref("/users_info/" + id + "/history/" + cnt + "/dates/" + date).update({
             'replacement': obj.replacement,
-            'count': obj.count
+            'count': obj.count,
+            'assigned_to': obj.assigned_to
         }, (error) => {
             if (error) console.log("The write failed :: editupdateWrite");
-            else console.log("Data saved successfully!");
+            else {
+                callback();
+                console.log("Data saved successfully!");
+            }
         });
     }
 

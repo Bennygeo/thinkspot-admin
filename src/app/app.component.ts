@@ -26,6 +26,7 @@ export class AppComponent implements OnInit {
     // this._router.navigate([{ outlets: { homeOutlet: ['customer-list'] } }]);
     this._service.readCustomerList(true);
     this._service.readOrdersList();
+    // this._service.readDeliverBoys();
   }
 
 }

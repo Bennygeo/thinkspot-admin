@@ -5,12 +5,14 @@
 
   <div class="row">
     <div class="col-3" *ngFor="let item of orders; let i = index;" (click)="onUserDatesClick($event, item)"
-      (clickOutside)=" closeOutsideSidenav()">
+      (clickOutside)=" closeOutsideSidenav()"
+      [ngStyle]="{'pointer-events': item.expired ? 'none' : 'all', 'opacity': item.expired ? '0.5' : '1'}">
       <div class="row" style="margin-bottom: 6px; margin-left:-9px; margin-right:-9px;">
         <div style="border:1px solid #ccc; margin-bottom: 6px; width: 100%;"
           [ngClass]="{'activeDate': selectedDateItem == item}">
-          <div class="col-12 center" style="font-size: 12px; background: #eee; margin-bottom: 6px; color: #aaa">
-            Day {{item.index}}
+          <div class="col-12 center" style="font-size: 12px; background: #eee; margin-bottom: 6px; color: #111"
+            [ngStyle]="{'background': item.today ? '#007bff' : '#DDD'}">
+             {{item.index}}
           </div>
           <div class="col-12 center">{{item.count}}</div>
           <div style="border-top:1px dashed #ccc; padding: 6px; text-align: center; font-size: 12px; "
@@ -18,6 +20,13 @@
             [ngClass]="{'delivered': false, 'notDelivered': false, 'missed': false, 'assigned': true}">
             {{item.date}}
           </div>
+
+          <div
+            style="border-top:1px dashed #ccc; padding: 6px; text-align: center; font-size: 12px; background: rgba(230,230,230,.5);"
+            class="col-12 center">
+            {{item.assigned_to}}
+          </div>
+
           <!-- <div>{{item.expired}}</div> -->
         </div>
       </div>
@@ -26,7 +35,7 @@
 
   <!-- Edit options -->
   <div class="row" *ngIf="editEnabled">
-    <div class="col-md-2">
+    <div class="col-md-12">
       <h6 style="background-color: #eee; padding: 6px; font-size: 14px;">Edit on {{selectedDateItem.date}}</h6>
       <plus-minus class="tenderComp" [caption]="'Select units'" [inputVal]="minCount" [stepVal]="1"
         (updateValue)="orderCountUpdate($event)"></plus-minus>
@@ -37,18 +46,48 @@
           (keypress)="numberOnly($event)">
       </mat-form-field>
 
+      <div [ngStyle]="{'margin-top': '12px', 'margin-bottom': '0px'}">
+        <mat-form-field [ngStyle]="{'width': '100%'}">
+          <mat-select placeholder="Assign delivery to" [value]="delivery_boys_list[assigned_to_index]"
+            (selectionChange)="onDeliveryBoyChange($event)">
+            <mat-option *ngFor="let item of delivery_boys_list; let i=index;" [value]="item">
+              {{item}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
       <button (click)="editUpdateAction()" class="btn btn-success" style="margin:6px; margin-left: 0;">Update</button>
       <button (click)="editCancelAction()" class="btn btn-danger">Cancel</button>
     </div>
   </div>
 
+  <!-- Edit options -->
+  <div class="row" *ngIf="postponeEnabled">
+    <div class="col-md-12">
+      <h6 style="background-color: #eee; padding: 6px; font-size: 14px;">Edit on {{selectedDateItem.date}}</h6>
+
+      <mat-form-field style="width: 100%; margin-top: 12px;">
+        <input matInput [(ngModel)]="noOfDaysToPostpone" placeholder="Number of days." onfocus="this.value=''"
+          maxlength="1" (keypress)="numberOnly($event)">
+      </mat-form-field>
+
+      <button (click)="postponeUpdateAction()" class="btn btn-success"
+        style="margin:6px; margin-left: 0;">Update</button>
+      <button (click)="postponeCancelAction()" class="btn btn-danger">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Menus -->
   <div class="row btn-group-vertical center" style="margin-left:-9px;margin-right:-9px;" *ngIf="btnsView">
     <button class="btn btn-primary" (click)="editAction()">Edit</button>
-    <button class="btn btn-info" (click)="postponeAction()">Postpone </button>
+    <button class="btn btn-info" (click)="postponeAction()" [attr.disabled]="dayExpired ? true : null">Postpone
+    </button>
     <button class="btn btn-danger" (click)="pauseAction()">Pause</button>
     <button class="btn btn-danger" (click)="stopAction()">Stop</button>
   </div>
 
+  <!-- orders description -->
   <div class="row" *ngIf="!ordersExist">
     <div class="col-md-2" align="center">
       <plus-minus class="tenderComp" [caption]="'Select units'" [inputVal]="minCount" [stepVal]="1"

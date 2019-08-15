@@ -105,8 +105,20 @@ export class CustomerViewComponent implements OnInit {
 
   mobile: any;
   selectedDateItem: any;
+  selectedDateIndex: number = 0;
   editEnabled: boolean = false;
+
+  postponeEnabled: boolean = false;
+  noOfDaysToPostpone: number = 0;
+
   noOfReplacements: number = 0;
+  delivery_boys_list: Array<string> = [];
+  assigned_to: string = 'nil';
+  assigned_to_index: number = -1;
+  delivered_by: string = 'nil';
+  dayExpired: boolean = false;
+
+  //postpone
 
   constructor(
     private _router: Router,
@@ -144,6 +156,8 @@ export class CustomerViewComponent implements OnInit {
 
   ngOnInit() {
 
+    // this.delivery_boys_list = this._service.deliveryBoysList;
+
     this.packageOptions = {
       "pack7": this.price - this.discount + this.deliveryCharges + ((this.strawFlag) ? 2 : 0),
       "3andmore": this.price - this.discount + this.deliveryCharges + ((this.strawFlag) ? 2 : 0),
@@ -156,12 +170,22 @@ export class CustomerViewComponent implements OnInit {
     this.priceOption = this.packageOptions["std"];
     this.renderChanges();
 
+    this._fb.readDeliverBoys().subscribe((data: any) => {
+      // debugger;
+      let index = -1;
+      for (let key in data) {
+        index++;
+        this.delivery_boys_list[index] = data[key];
+      }
+      // this.delivery_boys_list = ;
+      // this._service.deliveryBoysList = this.delivery_boys_list;
+    });
+
     this._activatedRoute.paramMap.subscribe(params => {
       this.mobile = params.get('mobile');
-      // console.log("mobile :: " + this.mobile);
-
       this.firebase.readOrders(this.mobile).subscribe((data: any) => {
 
+        // debugger;
         if (!data) {
           this.msg = "No active ordres.";
           this.ordersExist = false;
@@ -172,26 +196,35 @@ export class CustomerViewComponent implements OnInit {
         this._service.historyLength = Object.keys(data).length;
         let _data = data[this._service.historyLength];
 
+        // debugger;
         this.historyObj = _data;
         let cnt = -1;
+
+        //todays time in hours(24 hr format)
+        let todayTime = new Date().getHours();
+
         for (var key in _data["dates"]) {
           cnt++;
           var __date = this.date_utils.dateFormater(key, "-");
-          // console.log("key :: " + this.date_utils.stdDateFormater(__date));
-          // console.log("diff : " + );
+          //day difference from todays date
+          let diff = (Math.round(this.date_utils.dateDiff(new Date(), new Date(this.date_utils.stdDateFormater(__date)))));
           this.orders[cnt] = {
             index: _data["dates"][key].index,
             date: this.date_utils.dateFormater(key, "-"),
             count: _data["dates"][key].count,
-            expired: (Math.sign(this.date_utils.dateDiff(new Date(), new Date(this.date_utils.stdDateFormater(__date)))) == -1) ? false : true
+            assigned_to: _data["dates"][key].assigned_to,
+            //set expired if days or less than today || todaysTime >= 11
+            expired: (Math.sign(this.date_utils.dateDiff(new Date(), new Date(this.date_utils.stdDateFormater(__date)))) == -1 || todayTime <= 11) ? false : true,
+            today: diff == 1 ? true : false
           };
+          // console.log(" -------- " + (Math.round(this.date_utils.dateDiff(new Date(), new Date(this.date_utils.stdDateFormater(__date))))));
         }
 
-        // debugger;
+
         this.orders.sort(function (a, b) {
           return a.index - b.index
         });
-
+        // debugger;
         this._changeDet.detectChanges();
       });
 
@@ -395,7 +428,6 @@ export class CustomerViewComponent implements OnInit {
 
   addToSubscriptionBag() {
     let index = 0;
-
     this.historyObj = {
       // "start_date": this.date_utils.getDateString(this.start_date, "-"),
       // "end_date": this.date_utils.getDateString(this.end_date, "-"),
@@ -445,13 +477,17 @@ export class CustomerViewComponent implements OnInit {
   }
 
   onUserDatesClick(evt, data) {
-    // console.log(data);    
+    console.log(data);
+    this.selectedDateIndex = data.index;
     this.selectedDateItem = data;
+    this.dayExpired = data.expired;
+
     let date = this.date_utils.dateFormater(data.date, "");
-    // console.log("date :: " + data.date);
+    console.log("date :: " + data.date);
     // console.log("____________________________________");
 
     this.editEnabled = false;
+    this.postponeEnabled = false;
 
     if (!this.historyObj['dates'][date]["delivered"]) {
       this.btnsView = true;
@@ -475,7 +511,10 @@ export class CustomerViewComponent implements OnInit {
   }
 
   postponeAction() {
+    this.btnsView = false;
+    this.postponeEnabled = true;
     console.log("Postpone");
+
   }
 
   deleteAction() {
@@ -502,7 +541,11 @@ export class CustomerViewComponent implements OnInit {
     // this.historyObj['dates'][date]['count'] = this.editedUnitsPerDay;
 
     // console.log(this.historyObj['dates'][date]);
-    this.firebase.editupdateWrite("9486140936", this._service.historyLength, { count: this.editedUnitsPerDay, replacement: this.noOfReplacements }, date);
+    this.firebase.editupdateWrite("9486140936", this._service.historyLength, { count: this.editedUnitsPerDay, replacement: this.noOfReplacements, assigned_to: this.assigned_to, delivered_by: '' }, date, () => {
+      this.editEnabled = false;
+      this.btnsView = true;
+      this._changeDet.detectChanges();
+    });
     // console.log("update : " + this.editedUnitsPerDay + "  -- :: " + this.noOfReplacements);
     // debugger;
   }
@@ -511,7 +554,6 @@ export class CustomerViewComponent implements OnInit {
     console.log("editCancelAction");
     this.editEnabled = false;
     this.btnsView = true;
-
   }
 
   numberOnly(event): boolean {
@@ -520,6 +562,93 @@ export class CustomerViewComponent implements OnInit {
       return false;
     }
     return true;
+  }
+
+  onDeliveryBoyChange(evt): void {
+    this.assigned_to = evt.value;
+    this.assigned_to_index = this.delivery_boys_list.indexOf(this.assigned_to);
+  }
+
+  postponeUpdateAction() {
+    let trace = console.log;
+    // console.log("postponeUpdateAction :: " + this.noOfDaysToPostpone);
+    // console.log("days");
+    // console.log(this.orders[this.selectedDateIndex]);
+    let target = this.orders[this.selectedDateIndex];
+    let remainingDays = (this.orders.length - this.selectedDateIndex);
+    // console.log("remaining days : " + remainingDays);
+    debugger;
+    // trace(this.historyObj['dates'])
+    let ordersToPostpone = [];
+
+    for (let i = 0; i < remainingDays; i++) {
+
+      let _date = this.date_utils.addDays(new Date(this.date_utils.stdDateFormater(target.date)), i);
+      let dateRef = this.date_utils.getDateString(_date, "");
+      // trace(dateRef);
+      trace(this.historyObj['dates'][dateRef]);
+      trace("_______");
+
+      // object copy
+      ordersToPostpone[i] = JSON.parse(JSON.stringify(this.historyObj['dates'][dateRef]));
+
+      let index = this.selectedDateIndex * 1 + this.noOfDaysToPostpone * 1 + i;
+      // let targetDate = new Date(this.date_utils.stdDateFormater(target.date));
+      // trace(targetDate);
+      // trace("________");
+      //update the orders object from the copied object      
+      ordersToPostpone[i].index = (index - this.noOfDaysToPostpone * 1);
+
+      let updateDate = this.date_utils.addDays(_date, this.noOfDaysToPostpone * 1);
+      // ordersToPostpone[i].date = this.date_utils.getDateString(updateDate, "-");
+      // ordersToPostpone[i].delivered = false;
+      // console.log("deliver : " + ordersToPostpone[i].delivered);
+      // debugger;
+      // this.orders[index] = ordersToPostpone[i];
+      this.historyObj['dates'][this.date_utils.getDateString(updateDate, "")] = ordersToPostpone[i];
+    }
+
+    // for (let i = 0; i < this.noOfDaysToPostpone; i++) {
+    //   // console.log("postpone :: " + i);
+    //   this.orders[this.selectedDateIndex + i].count = 0;
+    //   this.orders[this.selectedDateIndex + i].postpone = true;
+    //   this.orders[this.selectedDateIndex + i].index = "postponed";
+    //   this.orders[this.selectedDateIndex + i].delivered = false;
+    // }
+    debugger;
+    // trace(this.historyObj['dates']);
+    // this.historyObj['dates'] = this.orders;
+
+
+    //   //object copy
+    //   ordersToPostpone[i] = JSON.parse(JSON.stringify(this.orders[this.selectedDateIndex + i]));
+
+    //   let index = this.selectedDateIndex * 1 + this.noOfDaysToPostpone * 1 + i;
+    //   let targetDate = new Date(this.date_utils.stdDateFormater(ordersToPostpone[i].date));
+    //   //update the orders object from the copied object      
+    //   ordersToPostpone[i].index = (index - this.noOfDaysToPostpone * 1);
+    //   let updateDate = this.date_utils.addDays(targetDate, this.noOfDaysToPostpone * 1);
+    //   ordersToPostpone[i].date = this.date_utils.getDateString(updateDate, "-");
+    //   ordersToPostpone[i].delivered = false;
+    //   // console.log("deliver : " + ordersToPostpone[i].delivered);
+    //   // debugger;
+    //   this.orders[index] = ordersToPostpone[i];
+    // }
+
+    // for (let i = 0; i < this.noOfDaysToPostpone; i++) {
+    //   // console.log("postpone :: " + i);
+    //   this.orders[this.selectedDateIndex + i].count = 0;
+    //   this.orders[this.selectedDateIndex + i].postpone = true;
+    //   this.orders[this.selectedDateIndex + i].index = "postponed";
+    //   this.orders[this.selectedDateIndex + i].delivered = false;
+    // }
+    // debugger;
+    // this.historyObj['dates'] = this.orders;
+  }
+
+  postponeCancelAction() {
+    this.postponeEnabled = false;
+    this.btnsView = true;
   }
 }
 
