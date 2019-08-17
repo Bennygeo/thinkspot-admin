@@ -17,7 +17,7 @@ export class MatDialogComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.dialogRef.updateSize('98%', '80%');
+    this.dialogRef.updateSize('98%', '90%');
   }
 
 }

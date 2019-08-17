@@ -1,13 +1,13 @@
 <div class="container">
-  <div class="row" style="margin-bottom: 6px; margin-left:-6px;">
+  <!-- <div class="row" style="margin-bottom: 6px; margin-left:-6px;">
     <button (click)="clickToHome()">home</button>
-  </div>
+  </div> -->
 
-  <div class="row">
+  <div class="row" style="margin-top:12px;">
     <div class="col-3" *ngFor="let item of orders; let i = index;" (click)="onUserDatesClick($event, item)"
       (clickOutside)=" closeOutsideSidenav()"
-      [ngStyle]="{'pointer-events': item.expired ? 'none' : 'all', 'opacity': item.expired ? '0.5' : '1'}">
-      <div class="row" style="margin-bottom: 6px; margin-left:-9px; margin-right:-9px;">
+      [ngStyle]="{'pointer-events': (item.expired || item.postponed) ? 'none' : 'all', 'opacity': (item.expired || item.postponed) ? '0.5' : '1'}">
+      <div class="row" style="margin-bottom: 6px; margin-left:-14px; margin-right:-14px;">
         <div style="border:1px solid #ccc; margin-bottom: 6px; width: 100%;"
           [ngClass]="{'activeDate': selectedDateItem == item}">
           <div class="col-12 center" style="font-size: 12px; background: #eee; margin-bottom: 6px; color: #111"
@@ -15,7 +15,7 @@
              {{item.index}}
           </div>
           <div class="col-12 center">{{item.count}}</div>
-          <div style="border-top:1px dashed #ccc; padding: 6px; text-align: center; font-size: 12px; "
+          <div style="border-top:1px dashed #ccc; padding: 6px; text-align: center; font-size: 11px; "
             class="col-12 center assigned"
             [ngClass]="{'delivered': false, 'notDelivered': false, 'missed': false, 'assigned': true}">
             {{item.date}}

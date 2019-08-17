@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, HostListener, NgZone } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, HostListener, NgZone, QueryList, ViewChildren } from '@angular/core';
 import { CommonsService } from 'src/app/services/commons.service';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material';
@@ -31,6 +31,7 @@ export class CustomerListComponent implements OnInit {
       this.userList = [];
       for (let key in data) {
         data[key].mobile = key;
+        data[key].checked = false;
         this.userList.push(data[key]);
       }
       // this.ngZone.run(() => this._router.navigate(['customer_list']));
@@ -40,16 +41,21 @@ export class CustomerListComponent implements OnInit {
 
   onCustomerClick(evt, index, mobile) {
     // debugger;
-    // console.log(index, mobile);
-    if (evt.target.innerText == "Book") {
+    let trace = console.log;
+    console.log(index, mobile);
+    trace("-- " + this.userList[index].checked);
+
+    this.userList[index].checked = (this.userList[index].checked) ? false : true;
+
+    if (evt.target.innerText == "View") {
       console.log("book an order");
       this.bookAnOrder(index, mobile);
     }
 
-    if (evt.target.innerText == "Break") {
-      console.log("postponed");
-      this.postponedAnOrder(index, mobile);
-    }
+    // if (evt.target.innerText == "Break") {
+    //   console.log("postponed");
+    //   this.postponedAnOrder(index, mobile);
+    // }
   }
 
   bookAnOrder(index, mobile) {
@@ -64,10 +70,16 @@ export class CustomerListComponent implements OnInit {
 
   }
 
+  assign() {
+    console.log("Assign deliveries.");
+  }
+
   inputTxtChanged(evt) {
     // console.log(evt);
     this.searchText = evt;
     // let data = this._service.userList;
     // https://stackblitz.com/edit/angular-search-filter
   }
+
+  @ViewChildren('checkboxMultiple') private checkboxesMultiple: QueryList<any>;
 }

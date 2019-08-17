@@ -26,10 +26,6 @@ export class HomeComponent implements OnInit {
 
   }
 
-  assign() {
-    console.log("Assign deliveries.");
-  }
-
   view_customers() {
     this._router.navigate(['/book_order/']);
     console.log("View customers.");
@@ -55,8 +51,11 @@ export class HomeComponent implements OnInit {
       // this._router.navigate([{ outlets: { dialogeOutlet: null } }]);
     });
     // this._router.navigate([{ outlets: { home: ['address'] } }]);
+  }
 
-
+  clickToHome() {
+    this._router.navigate(["customer_list"]);
+    this._service.readCustomerList(false);
   }
 
   @HostListener('window:popstate', ['$event'])

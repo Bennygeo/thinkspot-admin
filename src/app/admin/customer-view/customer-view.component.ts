@@ -215,6 +215,7 @@ export class CustomerViewComponent implements OnInit {
             assigned_to: _data["dates"][key].assigned_to,
             //set expired if days or less than today || todaysTime >= 11
             expired: (Math.sign(this.date_utils.dateDiff(new Date(), new Date(this.date_utils.stdDateFormater(__date)))) == -1 || todayTime <= 11) ? false : true,
+            postponed: (_data["dates"][key].index == 'postponed') ? true : false,
             today: diff == 1 ? true : false
           };
           // console.log(" -------- " + (Math.round(this.date_utils.dateDiff(new Date(), new Date(this.date_utils.stdDateFormater(__date))))));
@@ -483,7 +484,7 @@ export class CustomerViewComponent implements OnInit {
     this.dayExpired = data.expired;
 
     let date = this.date_utils.dateFormater(data.date, "");
-    console.log("date :: " + data.date);
+    // console.log("date :: " + data.date);
     // console.log("____________________________________");
 
     this.editEnabled = false;
@@ -499,10 +500,7 @@ export class CustomerViewComponent implements OnInit {
     return false;
   }
 
-  clickToHome() {
-    this._router.navigate(["customer_list"]);
-    this._service.readCustomerList(false);
-  }
+  
 
   editAction() {
     console.log("Edit");
@@ -571,79 +569,66 @@ export class CustomerViewComponent implements OnInit {
 
   postponeUpdateAction() {
     let trace = console.log;
-    // console.log("postponeUpdateAction :: " + this.noOfDaysToPostpone);
-    // console.log("days");
-    // console.log(this.orders[this.selectedDateIndex]);
-    let target = this.orders[this.selectedDateIndex];
-    let remainingDays = (this.orders.length - this.selectedDateIndex);
-    // console.log("remaining days : " + remainingDays);
-    debugger;
-    // trace(this.historyObj['dates'])
+    // let target = this.orders[this.selectedDateIndex];
+
+    let remainingDays = (this.orders.length - this.selectedDateIndex + 1);
     let ordersToPostpone = [];
 
+    //copy the days from postpone date
     for (let i = 0; i < remainingDays; i++) {
-
-      let _date = this.date_utils.addDays(new Date(this.date_utils.stdDateFormater(target.date)), i);
-      let dateRef = this.date_utils.getDateString(_date, "");
-      // trace(dateRef);
-      trace(this.historyObj['dates'][dateRef]);
-      trace("_______");
-
-      // object copy
-      ordersToPostpone[i] = JSON.parse(JSON.stringify(this.historyObj['dates'][dateRef]));
-
-      let index = this.selectedDateIndex * 1 + this.noOfDaysToPostpone * 1 + i;
-      // let targetDate = new Date(this.date_utils.stdDateFormater(target.date));
-      // trace(targetDate);
-      // trace("________");
-      //update the orders object from the copied object      
-      ordersToPostpone[i].index = (index - this.noOfDaysToPostpone * 1);
-
-      let updateDate = this.date_utils.addDays(_date, this.noOfDaysToPostpone * 1);
-      // ordersToPostpone[i].date = this.date_utils.getDateString(updateDate, "-");
-      // ordersToPostpone[i].delivered = false;
-      // console.log("deliver : " + ordersToPostpone[i].delivered);
-      // debugger;
-      // this.orders[index] = ordersToPostpone[i];
-      this.historyObj['dates'][this.date_utils.getDateString(updateDate, "")] = ordersToPostpone[i];
+      let index = (this.selectedDateIndex + i) - 1;
+      ordersToPostpone[i] = JSON.parse(JSON.stringify(this.orders[index]));
     }
 
-    // for (let i = 0; i < this.noOfDaysToPostpone; i++) {
-    //   // console.log("postpone :: " + i);
-    //   this.orders[this.selectedDateIndex + i].count = 0;
-    //   this.orders[this.selectedDateIndex + i].postpone = true;
-    //   this.orders[this.selectedDateIndex + i].index = "postponed";
-    //   this.orders[this.selectedDateIndex + i].delivered = false;
-    // }
-    debugger;
-    // trace(this.historyObj['dates']);
-    // this.historyObj['dates'] = this.orders;
+    //update the orders object
+    for (let i = 0; i < remainingDays; i++) {
+      let index1 = (this.selectedDateIndex - 1) * 1 + this.noOfDaysToPostpone * 1 + i;
 
+      //default date format
+      let targetDate = new Date(this.date_utils.stdDateFormater(ordersToPostpone[i].date));
 
-    //   //object copy
-    //   ordersToPostpone[i] = JSON.parse(JSON.stringify(this.orders[this.selectedDateIndex + i]));
+      //update the orders object from the copied object      
+      ordersToPostpone[i].index = (index1 - this.noOfDaysToPostpone * 1) + 1;
+      let updateDate = this.date_utils.addDays(targetDate, this.noOfDaysToPostpone * 1);
+      ordersToPostpone[i].date = this.date_utils.getDateString(updateDate, "-");
+      ordersToPostpone[i].delivered = false;
 
-    //   let index = this.selectedDateIndex * 1 + this.noOfDaysToPostpone * 1 + i;
-    //   let targetDate = new Date(this.date_utils.stdDateFormater(ordersToPostpone[i].date));
-    //   //update the orders object from the copied object      
-    //   ordersToPostpone[i].index = (index - this.noOfDaysToPostpone * 1);
-    //   let updateDate = this.date_utils.addDays(targetDate, this.noOfDaysToPostpone * 1);
-    //   ordersToPostpone[i].date = this.date_utils.getDateString(updateDate, "-");
-    //   ordersToPostpone[i].delivered = false;
-    //   // console.log("deliver : " + ordersToPostpone[i].delivered);
-    //   // debugger;
-    //   this.orders[index] = ordersToPostpone[i];
-    // }
+      this.orders[index1] = ordersToPostpone[i];
 
-    // for (let i = 0; i < this.noOfDaysToPostpone; i++) {
-    //   // console.log("postpone :: " + i);
-    //   this.orders[this.selectedDateIndex + i].count = 0;
-    //   this.orders[this.selectedDateIndex + i].postpone = true;
-    //   this.orders[this.selectedDateIndex + i].index = "postponed";
-    //   this.orders[this.selectedDateIndex + i].delivered = false;
-    // }
+      //histroy update for write firebase
+      let history_date = this.date_utils.getDateString(updateDate, "");
+      this.historyObj['dates'][history_date] = {
+        index: index1,
+        'delivered': false,
+        'missed': false,
+        'replacement': 0,
+        'assigned_to': 'nil',
+        'delivered_by': 'nil',
+        'count': ordersToPostpone[i].count
+      }
+    }
+
+    for (let i = 0; i < this.noOfDaysToPostpone; i++) {
+      // console.log("postpone :: " + i);
+      let target = (this.selectedDateIndex + i) - 1;
+      this.orders[target].count = 0;
+      this.orders[target].postpone = true;
+      this.orders[target].index = "postponed";
+      this.orders[target].delivered = false;
+      // debugger;
+      let history_date = this.date_utils.dateFormater(this.orders[target].date, "");
+      this.historyObj['dates'][history_date] = {
+        index: "postponed",
+        'delivered': false,
+        'missed': false,
+        'replacement': 0,
+        'assigned_to': 'nil',
+        'delivered_by': 'nil',
+        'count': 0,
+      }
+    }
+    this.firebase.user_history("9486140936", this.historyObj, "yes", this._service.historyLength);
     // debugger;
-    // this.historyObj['dates'] = this.orders;
   }
 
   postponeCancelAction() {
