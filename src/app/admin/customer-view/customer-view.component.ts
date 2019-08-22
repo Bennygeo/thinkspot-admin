@@ -109,7 +109,7 @@ export class CustomerViewComponent implements OnInit {
   editEnabled: boolean = false;
 
   postponeEnabled: boolean = false;
-  noOfDaysToPostpone: number = 0;
+  noOfDaysToPostpone: number = 1;
 
   noOfReplacements: number = 0;
   delivery_boys_list: Array<string> = [];
@@ -118,7 +118,8 @@ export class CustomerViewComponent implements OnInit {
   delivered_by: string = 'nil';
   dayExpired: boolean = false;
 
-  //postpone
+  //delete
+  stopEnabled: boolean = false;
 
   constructor(
     private _router: Router,
@@ -184,8 +185,6 @@ export class CustomerViewComponent implements OnInit {
     this._activatedRoute.paramMap.subscribe(params => {
       this.mobile = params.get('mobile');
       this.firebase.readOrders(this.mobile).subscribe((data: any) => {
-
-        // debugger;
         if (!data) {
           this.msg = "No active ordres.";
           this.ordersExist = false;
@@ -207,26 +206,24 @@ export class CustomerViewComponent implements OnInit {
           cnt++;
           var __date = this.date_utils.dateFormater(key, "-");
           //day difference from todays date
-          let diff = (Math.round(this.date_utils.dateDiff(new Date(), new Date(this.date_utils.stdDateFormater(__date)))));
+          let diff = (Math.round(this.date_utils.dateDiff(new Date(), new Date(this.date_utils.stdDateFormater(__date, "/")))));
           this.orders[cnt] = {
             index: _data["dates"][key].index,
             date: this.date_utils.dateFormater(key, "-"),
             count: _data["dates"][key].count,
             assigned_to: _data["dates"][key].assigned_to,
             //set expired if days or less than today || todaysTime >= 11
-            expired: (Math.sign(this.date_utils.dateDiff(new Date(), new Date(this.date_utils.stdDateFormater(__date)))) == -1 || todayTime <= 11) ? false : true,
+            expired: (Math.sign(this.date_utils.dateDiff(new Date(), new Date(this.date_utils.stdDateFormater(__date, "/")))) == -1 || todayTime <= 11) ? false : true,
             postponed: (_data["dates"][key].index == 'postponed') ? true : false,
-            today: diff == 1 ? true : false
+            stopped: (_data["dates"][key].index == 'Stopped') ? true : false,
+            today: diff == 1 ? true : false,
+            actualIndex: _data["dates"][key].actualIndex,
           };
-          // console.log(" -------- " + (Math.round(this.date_utils.dateDiff(new Date(), new Date(this.date_utils.stdDateFormater(__date))))));
         }
-
-
         this.orders.sort(function (a, b) {
           return a.index - b.index
         });
-        // debugger;
-        this._changeDet.detectChanges();
+        // this._changeDet.detectChanges();
       });
 
     });
@@ -445,52 +442,53 @@ export class CustomerViewComponent implements OnInit {
       }
     }
 
+    // console.log("addToSubscriptionBag");
     for (var key in this.selectedDays) {
       index++;
       if (this.selectedDays[key] == 1) {
         // console.log("Key :: " + key);
         let _date = this.date_utils.addDays(new Date(), key);
         // console.log("date :: " + _date);
-        this.firebase.write_tc_orders(this.date_utils.getDateString(_date, ""), "9486140936", this.tenderDetails);
+        this.firebase.write_tc_orders(this.date_utils.getDateString(_date, ""), this.mobile, this.tenderDetails);
 
         this.historyObj['dates'][this.date_utils.getDateString(_date, "")] = {
           index: index,
+          actualIndex: index,
           'delivered': false,
           'missed': false,
           'replacement': 0,
-          'assigned_to': 'nil',
+          'assigned_to': this.assigned_to,
           'delivered_by': 'nil',
           'count': this.unitsPerDay
         }
       }
     }
     // let start = this.date_utils.stdDateFormater(this.historyObj['start_date']);
-    this.firebase.user_history("9486140936", this.historyObj, "yes", this._service.historyLength + 1);
+    this.firebase.user_history(this.mobile, this.historyObj, "yes", this._service.historyLength + 1);
   }
-
 
   @HostListener('document:click', ['$event.target'])
   public onClick(targetElement) {
 
   }
+
   closeOutsideSidenav() {
     console.log("closeOutsideSidenav");
   }
 
   onUserDatesClick(evt, data) {
-    console.log(data);
-    this.selectedDateIndex = data.index;
+    this.selectedDateIndex = data.actualIndex;
     this.selectedDateItem = data;
     this.dayExpired = data.expired;
 
     let date = this.date_utils.dateFormater(data.date, "");
-    // console.log("date :: " + data.date);
-    // console.log("____________________________________");
 
     this.editEnabled = false;
     this.postponeEnabled = false;
+    this.stopEnabled = false;
 
-    if (!this.historyObj['dates'][date]["delivered"]) {
+    // console.log("expired :: " + this.historyObj['dates'][date]["expired"])
+    if (!this.historyObj['dates'][date]["delivered"] && !this.historyObj['dates'][date]["expired"]) {
       this.btnsView = true;
     } else {
       this.btnsView = false;
@@ -499,8 +497,6 @@ export class CustomerViewComponent implements OnInit {
     this._changeDet.detectChanges();
     return false;
   }
-
-  
 
   editAction() {
     console.log("Edit");
@@ -523,10 +519,6 @@ export class CustomerViewComponent implements OnInit {
     console.log("Pause");
   }
 
-  stopAction() {
-    console.log("Stop");
-  }
-
   orderCountUpdate(val) {
     this.editedUnitsPerDay = val;
   }
@@ -539,7 +531,7 @@ export class CustomerViewComponent implements OnInit {
     // this.historyObj['dates'][date]['count'] = this.editedUnitsPerDay;
 
     // console.log(this.historyObj['dates'][date]);
-    this.firebase.editupdateWrite("9486140936", this._service.historyLength, { count: this.editedUnitsPerDay, replacement: this.noOfReplacements, assigned_to: this.assigned_to, delivered_by: '' }, date, () => {
+    this.firebase.editupdateWrite(this.mobile, this._service.historyLength, { count: this.editedUnitsPerDay, replacement: this.noOfReplacements, assigned_to: this.assigned_to, delivered_by: '' }, date, () => {
       this.editEnabled = false;
       this.btnsView = true;
       this._changeDet.detectChanges();
@@ -565,13 +557,16 @@ export class CustomerViewComponent implements OnInit {
   onDeliveryBoyChange(evt): void {
     this.assigned_to = evt.value;
     this.assigned_to_index = this.delivery_boys_list.indexOf(this.assigned_to);
+    // console.log("this.assigned_to_index :: " + this.assigned_to_index);
   }
 
   postponeUpdateAction() {
     let trace = console.log;
     // let target = this.orders[this.selectedDateIndex];
+    let pastPostponeCount = 0;
 
     let remainingDays = (this.orders.length - this.selectedDateIndex + 1);
+    // trace("remainingDays :: " + remainingDays);
     let ordersToPostpone = [];
 
     //copy the days from postpone date
@@ -582,13 +577,23 @@ export class CustomerViewComponent implements OnInit {
 
     //update the orders object
     for (let i = 0; i < remainingDays; i++) {
-      let index1 = (this.selectedDateIndex - 1) * 1 + this.noOfDaysToPostpone * 1 + i;
+      let index1 = (this.selectedDateIndex - 1) * 1 + this.noOfDaysToPostpone * 1 + i - pastPostponeCount;
+      // let actualIndex = (this.selectedDateIndex) * 1 + this.noOfDaysToPostpone * 1 + i;
+
+      // trace("index 1 :: " + index1 + " actualIndex :: " + actualIndex);
 
       //default date format
-      let targetDate = new Date(this.date_utils.stdDateFormater(ordersToPostpone[i].date));
+      let targetDate = new Date(this.date_utils.stdDateFormater(ordersToPostpone[i].date, "/"));
 
+      // trace("ordersToPostpone[i].index :: " + ordersToPostpone[i].index);
       //update the orders object from the copied object      
-      ordersToPostpone[i].index = (index1 - this.noOfDaysToPostpone * 1) + 1;
+      if (ordersToPostpone[i].index != 'postponed') {
+        ordersToPostpone[i].index = (index1 - this.noOfDaysToPostpone * 1) + 1 - pastPostponeCount;
+        ordersToPostpone[i].actualIndex = (index1 + this.noOfDaysToPostpone * 1);
+      } else {
+        pastPostponeCount++;
+      }
+      // trace("pastPostponeCount :: " + pastPostponeCount);
       let updateDate = this.date_utils.addDays(targetDate, this.noOfDaysToPostpone * 1);
       ordersToPostpone[i].date = this.date_utils.getDateString(updateDate, "-");
       ordersToPostpone[i].delivered = false;
@@ -597,20 +602,32 @@ export class CustomerViewComponent implements OnInit {
 
       //histroy update for write firebase
       let history_date = this.date_utils.getDateString(updateDate, "");
-      this.historyObj['dates'][history_date] = {
-        index: index1,
-        'delivered': false,
-        'missed': false,
-        'replacement': 0,
-        'assigned_to': 'nil',
-        'delivered_by': 'nil',
-        'count': ordersToPostpone[i].count
+      if (ordersToPostpone[i].index != 'postponed') {
+        this.historyObj['dates'][history_date] = {
+          'delivered': false,
+          'missed': false,
+          'replacement': 0,
+          'assigned_to': this.assigned_to,
+          'delivered_by': 'nil',
+          'count': ordersToPostpone[i].count
+        }
+      } else {
+        this.historyObj['dates'][history_date] = {
+          index: 'postponed',
+          'delivered': false,
+          'missed': false,
+          'replacement': 0,
+          'assigned_to': this.assigned_to,
+          'delivered_by': 'nil',
+          'count': 0
+        }
       }
     }
 
     for (let i = 0; i < this.noOfDaysToPostpone; i++) {
       // console.log("postpone :: " + i);
       let target = (this.selectedDateIndex + i) - 1;
+
       this.orders[target].count = 0;
       this.orders[target].postpone = true;
       this.orders[target].index = "postponed";
@@ -627,12 +644,67 @@ export class CustomerViewComponent implements OnInit {
         'count': 0,
       }
     }
-    this.firebase.user_history("9486140936", this.historyObj, "yes", this._service.historyLength);
-    // debugger;
+
+    //index update fro both local and firebase object.
+    let actualIndex = 0, index = 0;
+    for (let key in this.orders) {
+      actualIndex++;
+      this.orders[key].actualIndex = actualIndex;
+      if (this.orders[key].index != 'postponed') {
+        index++;
+        this.orders[key].index = index;
+      }
+
+    }
+
+    let actualIndex1 = 0, index1 = 0;
+    for (let key in this.historyObj['dates']) {
+      actualIndex1++;
+      this.historyObj['dates'][key].actualIndex = actualIndex1;
+      if (this.historyObj['dates'][key].index != 'postponed') {
+        index1++;
+        this.historyObj['dates'][key].index = index1;
+      }
+
+    }
+    this.firebase.user_history(this.mobile, this.historyObj, "yes", this._service.historyLength);
   }
 
   postponeCancelAction() {
     this.postponeEnabled = false;
+    this.btnsView = true;
+  }
+
+  stopAction() {
+    console.log("Stop");
+    this.stopEnabled = true;
+    this.btnsView = false;
+  }
+
+  stopUpdateAction() {
+    console.log("stopUpdateAction");
+    let remainingDays = (this.orders.length - this.selectedDateIndex + 1);
+    let trace = console.log;
+    let targetDate = new Date(this.date_utils.stdDateFormater(this.orders[this.selectedDateIndex - 2].date, "/"));
+
+    for (let i = this.selectedDateIndex - 1; i < this.orders.length; i++) {
+      this.orders[i].index = "Stopped";
+      this.orders[i].count = 0;
+    }
+
+    for (let i = 0; i < remainingDays; i++) {
+      let updateDate = this.date_utils.addDays(targetDate, 1);
+      let _date = this.date_utils.getDateString(updateDate, "");
+
+      this.historyObj['dates'][_date].index = "Stopped";
+      this.historyObj['dates'][_date].count = 0;
+      this.historyObj['dates'][_date].expired = true;
+    }
+    this.firebase.user_history(this.mobile, this.historyObj, "yes", this._service.historyLength);
+  }
+
+  stopCancelAction() {
+    this.stopEnabled = false;
     this.btnsView = true;
   }
 }

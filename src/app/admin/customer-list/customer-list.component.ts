@@ -26,7 +26,7 @@ export class CustomerListComponent implements OnInit {
     // console.log("customer list class :: oninit");
     // debugger;
     this._service.onUserListUpdate.subscribe((data) => {
-      console.log("REcieve data");
+      // console.log("REcieve data");
       console.log(data);
       this.userList = [];
       for (let key in data) {
@@ -42,13 +42,12 @@ export class CustomerListComponent implements OnInit {
   onCustomerClick(evt, index, mobile) {
     // debugger;
     let trace = console.log;
-    console.log(index, mobile);
-    trace("-- " + this.userList[index].checked);
+    // trace("-- " + this.userList[index].checked);
 
     this.userList[index].checked = (this.userList[index].checked) ? false : true;
 
     if (evt.target.innerText == "View") {
-      console.log("book an order");
+      // console.log("book an order");
       this.bookAnOrder(index, mobile);
     }
 
@@ -56,6 +55,7 @@ export class CustomerListComponent implements OnInit {
     //   console.log("postponed");
     //   this.postponedAnOrder(index, mobile);
     // }
+    return false;
   }
 
   bookAnOrder(index, mobile) {
@@ -66,12 +66,12 @@ export class CustomerListComponent implements OnInit {
     this._router.navigate(['/customer_view/' + Date.now(), { mobile: mobile, index: index }]);
   }
 
-  postponedAnOrder(index, mobile) {
-
-  }
-
   assign() {
     console.log("Assign deliveries.");
+    for (let key in this.userList) {
+      // console.log(this.userList[key]);
+      if (this.userList[key].checked) console.log(this.userList[key]);
+    }
   }
 
   inputTxtChanged(evt) {
@@ -81,5 +81,4 @@ export class CustomerListComponent implements OnInit {
     // https://stackblitz.com/edit/angular-search-filter
   }
 
-  @ViewChildren('checkboxMultiple') private checkboxesMultiple: QueryList<any>;
 }

@@ -24,9 +24,9 @@ export class DateUtils extends Date {
             return dateString.slice(0, 2) + divider + dateString.slice(2, 4) + divider + dateString.slice(4);
     }
 
-    stdDateFormater(date: string) {
+    stdDateFormater(date: string, divider) {
         let data = date.split('-');
-        return data[1] + '/' + data[0] + '/' + data[2];
+        return data[1] + divider + data[0] + divider + data[2];
     }
 
     dateDiff(date1, date2): number {
@@ -34,5 +34,5 @@ export class DateUtils extends Date {
         return timeDiff / (1000 * 3600 * 24);
     }
 
-    
+
 }

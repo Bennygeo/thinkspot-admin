@@ -5,7 +5,6 @@
                 <mat-form-field class="input-full-width" style="margin-top:6px;">
                     <input matInput placeholder="Search" value="" (input)="inputTxtChanged($event.target.value)">
                 </mat-form-field>
-
             </form>
         </div>
         <div class="col-3 right" style="margin-top:18px;">
@@ -13,6 +12,19 @@
                     style="margin:0; font-size:22px;">search</i></button>
         </div>
     </div>
+
+    <div class="row" style="padding: 6px;">
+        <div style="position: relative; padding-right: 0px; padding-left: 6px; ">
+            <mat-checkbox [checked]='true' style="margin-right: 12px;">All</mat-checkbox>
+        </div>
+        <div style="position: relative; padding-right: 0px; padding-left: 6px;">
+            <mat-checkbox [checked]='false' style="margin-right: 12px;">active</mat-checkbox>
+        </div>
+        <div style="position: relative; padding-right: 0px; padding-left: 6px;">
+            <mat-checkbox [checked]='false' style="margin-right: 12px;">in-active</mat-checkbox>
+        </div>
+    </div>
+
     <!-- <p style="margin-left: -6px">Customer's list</p> -->
     <div class="row box" *ngFor="let item of userList | filter:searchText; let i = index;"
         (click)="onCustomerClick($event, i,item.mobile)" id="{{'list_' + i}}">
