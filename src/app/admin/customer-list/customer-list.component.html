@@ -13,15 +13,22 @@
         </div>
     </div>
 
+
     <div class="row" style="padding: 6px;">
-        <div style="position: relative; padding-right: 0px; padding-left: 6px; ">
-            <mat-checkbox [checked]='true' style="margin-right: 12px;">All</mat-checkbox>
+        <div style="position: relative; padding-right: 0px; padding-left: 6px;">
+            <mat-checkbox [checked]='checkboxSelectors.all' style="margin-right: 12px;" (change)="onAllClick($event)">
+                All
+            </mat-checkbox>
         </div>
         <div style="position: relative; padding-right: 0px; padding-left: 6px;">
-            <mat-checkbox [checked]='false' style="margin-right: 12px;">active</mat-checkbox>
+            <mat-checkbox [checked]='checkboxSelectors.active' style="margin-right: 12px;"
+                (change)="onActiveClick($event)">active
+            </mat-checkbox>
         </div>
         <div style="position: relative; padding-right: 0px; padding-left: 6px;">
-            <mat-checkbox [checked]='false' style="margin-right: 12px;">in-active</mat-checkbox>
+            <mat-checkbox [checked]='checkboxSelectors.inactive' style="margin-right: 12px;"
+                (change)="onAInactiveClick($event)">in-active
+            </mat-checkbox>
         </div>
     </div>
 

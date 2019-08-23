@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, HostListener, NgZone, QueryList, ViewChildren } from '@angular/core';
+import { Component, OnInit, NgZone } from '@angular/core';
 import { CommonsService } from 'src/app/services/commons.service';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material';
@@ -12,6 +12,13 @@ export class CustomerListComponent implements OnInit {
 
   userList: Array<any> = [];
   searchText: string = "";
+  checkedCnt: number = 0;
+
+  checkboxSelectors: Object = {
+    all: false,
+    active: false,
+    inactive: false
+  }
 
   constructor(
     private _service: CommonsService,
@@ -46,6 +53,14 @@ export class CustomerListComponent implements OnInit {
 
     this.userList[index].checked = (this.userList[index].checked) ? false : true;
 
+    this.checkedItemCnt();
+    // trace(this.checkedCnt, this.userList.length);
+    if (this.checkedCnt == this.userList.length) {
+      this.checkboxSelectors['all'] = true;
+    } else {
+      this.checkboxSelectors['all'] = false;
+    }
+
     if (evt.target.innerText == "View") {
       // console.log("book an order");
       this.bookAnOrder(index, mobile);
@@ -59,7 +74,7 @@ export class CustomerListComponent implements OnInit {
   }
 
   bookAnOrder(index, mobile) {
-    console.log("bookAnOrder");
+    // console.log("bookAnOrder");
     // customer_view
     // this._router.navigate([{ outlets: { dialogeOutlet: null } }]);
     // console.log("index :: " + index);
@@ -67,10 +82,39 @@ export class CustomerListComponent implements OnInit {
   }
 
   assign() {
-    console.log("Assign deliveries.");
+    // console.log("Assign deliveries.");
     for (let key in this.userList) {
       // console.log(this.userList[key]);
       if (this.userList[key].checked) console.log(this.userList[key]);
+    }
+  }
+
+  checkedItemCnt() {
+    this.checkedCnt = 0;
+    for (let i = 0; i < this.userList.length; i++) {
+      if (this.userList[i].checked) this.checkedCnt++;
+    }
+  }
+
+  onAllClick(e) {
+    // this.checkedItemCnt();
+    this.checkboxSelectors['all'] = e.checked;
+    for (let i = 0; i < this.userList.length; i++) {
+      this.userList[i].checked = e.checked;
+    }
+  }
+
+  onActiveClick(e) {
+    if (this.checkedCnt != this.userList.length) {
+      this.checkboxSelectors['all'] = false;
+    }
+    // console.log("active");
+  }
+
+  onAInactiveClick(e) {
+    console.log("in  active");
+    if (this.checkedCnt != this.userList.length) {
+      this.checkboxSelectors['all'] = false;
     }
   }
 
