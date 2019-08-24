@@ -27,7 +27,7 @@ import { PlusMinusComponent } from './utils/plus-minus/plus-minus.component';
 import { Utils } from './utils/utils';
 import { DateUtils } from './utils/date-utils';
 
-import { Ng2SearchPipeModule } from 'ng2-search-filter';
+import { Ng2SearchPipeModule, Ng2SearchPipe } from 'ng2-search-filter';
 
 @NgModule({
   declarations: [
@@ -62,6 +62,7 @@ import { Ng2SearchPipeModule } from 'ng2-search-filter';
     DateUtils,
     // AuthService,
     AngularFireDatabase,
+    Ng2SearchPipe,
     { provide: LocationStrategy, useClass: HashLocationStrategy }
   ],
   bootstrap: [AppComponent]
