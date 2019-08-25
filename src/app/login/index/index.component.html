@@ -1,0 +1,27 @@
+<div class="wrapper fadeInDown">
+    <div id="formContent">
+        <!-- Tabs Titles -->
+
+        <!-- Icon -->
+        <div class="fadeIn first">
+            <i class="material-icons" style="padding: 12px;">
+                person
+            </i>
+        </div>
+
+        <!-- Login Form -->
+        <form>
+            <div style="font-size:10px;">Mobile number</div>
+            <input type="text" id="login" class="fadeIn second" name="login" placeholder="" #user>
+            <div style="font-size:14px; color: #666;">Hello {{credentialOwner| titlecase}}!</div>
+            <input #pswd type="text" id="password" class="fadeIn third" name="login" placeholder="password">
+            <input type="submit" class="fadeIn fourth" (click)="onLoginAction(user, pswd)" value="Log In">
+        </form>
+
+        <!-- Remind Passowrd -->
+        <div id="formFooter">
+            <a class="underlineHover">Forgot Password?</a>
+        </div>
+
+    </div>
+</div>

@@ -6,6 +6,7 @@ export class FireBase implements OnInit {
 
     itemValue = '';
     items: Observable<any[]>;
+    test: Observable<any[]>;
     database_obs: any;
 
     constructor(private db: AngularFireDatabase) {
@@ -19,6 +20,15 @@ export class FireBase implements OnInit {
         console.log("read data");
         return new Observable((observer) => {
             var ref = this.db.database.ref('/users_info');
+            ref.on("value", function (snapshot) {
+                observer.next(snapshot.exportVal());
+            });
+        });
+    }
+
+    public readLoginDetails() {
+        return new Observable((observer) => {
+            var ref = this.db.database.ref('/login');
             ref.on("value", function (snapshot) {
                 observer.next(snapshot.exportVal());
             });
@@ -40,6 +50,22 @@ export class FireBase implements OnInit {
             ref.on("value", function (snapshot) {
                 observer.next(snapshot.exportVal());
             });
+        });
+    }
+
+    public readDailyOrders(date) {
+        console.log("readDailyOrders");
+        return new Observable((observer) => {
+            var ref = this.db.database.ref("orders/" + date);
+            ref.on("value", function (snapshot) {
+                observer.next(snapshot.exportVal());
+            });
+        });
+    }
+
+    public writeDailyOrders(mobile, date, data) {
+        var ref = this.db.database.ref("orders/" + date).update({
+            [mobile + '/tender/']: data
         });
     }
 
@@ -95,6 +121,21 @@ export class FireBase implements OnInit {
         }, (error) => {
             if (error) console.log("The write failed...");
             else console.log("Data saved successfully!");
+        });
+    }
+
+    /*
+    * Write from customer list ts
+    */
+    public update_user_info(mobile, date, index, data) {
+        this.db.database.ref("/users_info/" + mobile + "/history/" + index + "/dates/" + date + "/").update({
+            "assigned_to": data
+        }, (error) => {
+            if (error) console.log("123 :: The write failed : editupdateWrite");
+            else {
+                // callback();
+                console.log("123 :: Data saved successfully!");
+            }
         });
     }
 

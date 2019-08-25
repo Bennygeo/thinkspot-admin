@@ -10,8 +10,12 @@ import { CustomerViewComponent } from './admin/customer-view/customer-view.compo
 const routes: Routes = [
   {
     path: '',
-    redirectTo: 'customer_list',
+    redirectTo: 'login',
     pathMatch: 'full'
+  },
+  {
+    path: 'login',
+    loadChildren: './login/login.module#LoginModule'
   },
   {
     path: 'address',

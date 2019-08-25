@@ -14,8 +14,6 @@ import { DateUtils } from 'src/app/utils/date-utils';
 
 export class CustomerViewComponent implements OnInit {
 
-  private _fb: FireBase;
-
   /*
   * Tender types
   */
@@ -133,7 +131,7 @@ export class CustomerViewComponent implements OnInit {
     private _activatedRoute: ActivatedRoute,
     private _changeDet: ChangeDetectorRef,
   ) {
-    this._fb = new FireBase(this._db);
+
     this.type = this.types[0];
 
     this.weekdays = this._utils.weekdays.slice(this._utils.todayNo + 1, 7).concat(this._utils.weekdays.slice(0, this._utils.todayNo + 1));
@@ -171,7 +169,7 @@ export class CustomerViewComponent implements OnInit {
     this.priceOption = this.packageOptions["std"];
     this.renderChanges();
 
-    this._fb.readDeliverBoys().subscribe((data: any) => {
+    this.firebase.readDeliverBoys().subscribe((data: any) => {
       // debugger;
       let index = -1;
       for (let key in data) {
@@ -184,7 +182,16 @@ export class CustomerViewComponent implements OnInit {
 
     this._activatedRoute.paramMap.subscribe(params => {
       this.mobile = params.get('mobile');
+      console.log("this.mobile :: " + this.mobile);
       this.firebase.readOrders(this.mobile).subscribe((data: any) => {
+
+        try {
+          this._service.historyLength = Object.keys(data).length || 0;
+        } catch (e) {
+          this._service.historyLength = 0;
+        }
+        // console.log("this._service.historyLength :: " + this._service.historyLength);
+
         if (!data) {
           this.msg = "No active ordres.";
           this.ordersExist = false;
@@ -192,7 +199,6 @@ export class CustomerViewComponent implements OnInit {
         };
 
         this.ordersExist = true;
-        this._service.historyLength = Object.keys(data).length;
         let _data = data[this._service.historyLength];
 
         // debugger;
@@ -338,10 +344,11 @@ export class CustomerViewComponent implements OnInit {
       "end_date": this.date_utils.getDateString(this.end_date, ""),
       "paid": "No",
       "nut_type": "sweet",
+      "assigned_to": this.assigned_to,
     }
   }
 
-  private onNutVarietyChange(e) {
+  onNutVarietyChange(e): void {
     console.log(e.value);
   }
 
@@ -464,6 +471,7 @@ export class CustomerViewComponent implements OnInit {
       }
     }
     // let start = this.date_utils.stdDateFormater(this.historyObj['start_date']);
+    // debugger;
     this.firebase.user_history(this.mobile, this.historyObj, "yes", this._service.historyLength + 1);
   }
 
@@ -665,7 +673,6 @@ export class CustomerViewComponent implements OnInit {
         index1++;
         this.historyObj['dates'][key].index = index1;
       }
-
     }
     this.firebase.user_history(this.mobile, this.historyObj, "yes", this._service.historyLength);
   }
